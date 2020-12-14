@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html style="height: 100%; margin: 0%;">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <title>外卖订单管理系统</title>
+</head>
+
+<body style="height: 100%; margin: 0%;">
+
+    <div id="app" style="height: 100%; margin: 0%;">
+        <el-dialog title="请输入信息" :visible.sync="dialog2Visible" :modal-append-to-body='false'
+            :close-on-click-modal='false'>
+            <el-form :model="form">
+                <el-form-item label="商家名">
+                    <el-input v-model="form.Rname"></el-input>
+                </el-form-item>
+                <el-form-item label="商家地址">
+                    <el-input v-model="form.Radd"></el-input>
+                </el-form-item>
+                <el-form-item label="商家电话">
+                    <el-input v-model="form.Rtel"></el-input>
+                </el-form-item>
+                <el-form-item label="商家类型">
+                    <el-select v-model="form.Rtype">
+                        <el-option value="快餐便当">快餐便当</el-option>
+                        <el-option value="特色小吃">特色小吃</el-option>
+                        <el-option value="米饭面馆">米饭面馆</el-option>
+                        <el-option value="汉堡薯条">汉堡薯条</el-option>
+                        <el-option value="川湘菜">川湘菜</el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商家等级">
+                    <el-input v-model="form.Rgrade" :disabled="disabled1"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialog2Visible = false">取消</el-button>
+                <el-button type="primary" @click="handleClose2()">确定</el-button>
+            </span>
+        </el-dialog>
+
+
+        <el-button type="primary" icon="el-icon-plus">添加</el-button>
+        <el-button icon="el-icon-refresh">刷新</el-button>
+        <el-input placeholder="请输入搜索内容" v-model="search" suffix-icon="el-icon-search" style="width: max-content; float: right;">
+        </el-input>
+        <br><br>
+        <el-table :data="tableData.filter(data => !search || data.Rname.toLowerCase().includes(search.toLowerCase()) || 
+            data.Radd.toLowerCase().includes(search.toLowerCase()) || data.Rtype.toLowerCase().includes(search.toLowerCase())) || 
+            data.Rtel.toLowerCase().includes(search.toLowerCase())" style="width: 100%">
+            <el-table-column prop="Rno" label="商家ID" width="180">
+            </el-table-column>
+            <el-table-column prop="Rname" label="商家名" width="180">
+            </el-table-column>
+            <el-table-column prop="Radd" label="商家地址" width="280">
+            </el-table-column>
+            <el-table-column prop="Rtype" label="商家类型" width="100">
+            </el-table-column>
+            <el-table-column prop="Rtel" label="商家电话" width="180">
+            </el-table-column>
+            <el-table-column prop="Rgrade" label="商家等级" width="100">
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" width="180">
+                <template slot-scope="scope">
+                    <el-button @click="modify(scope.$index, tableData)" size="small">修改</el-button>
+                    <el-button @click="deleteRow(scope.$index, tableData)" type="danger" size="small">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+</body>
+
+
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- <script src="project.js"></script> -->
+
+<style>
+    .el-header {
+        background-color: #B3C0D1;
+        color: #333;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        color: #333;
+    }
+</style>
+
+<script>
+
+    var Main = {
+        methods: {
+            deleteRow(index, rows) {
+                rows.splice(index, 1);
+                //数据库delete
+            },
+            handleClick(row) {
+                console.log(row);
+            },
+            select_click(inputs) {
+                console.log(inputs);
+            },
+            modify(index, rows) {
+                console.log(index);
+                this.form.index = index;
+                this.form.Rno = rows[index].Rno;
+                this.form.Rname = rows[index].Rname;
+                this.form.Radd = rows[index].Radd;
+                this.form.Rtype = rows[index].Rtype;
+                this.form.Rgrade = rows[index].Rgrade;
+                this.form.Rtel = rows[index].Rtel;
+                console.log(rows);
+                if (this.actionType == 0 || this.actionType == 2) {//
+                    this.dialog2Visible = true;
+                    if (this.actionType == 2) {
+                        this.disabled1 = false;
+                    }
+                    else {
+                        this.disabled1 = true;
+                    }
+                }
+                else {
+                    this.$message('您当前权限不足！')
+                    this.dialog2Visible = false;
+                }
+            },
+            handleClose2() {
+                this.dialog2Visible = false;
+                console.log(this.form);
+                var index = this.form.index;
+                this.$http.post('/update_restaurant', {
+                    Rno: this.form.Rno,
+                    Rname: this.form.Rname,
+                    Radd: this.form.Radd,
+                    Rtype: this.form.Rtype,
+                    Rgrade: this.form.Rgrade,
+                    Rtel: this.form.Rtel
+                }).then(function (res) {
+                    // if (res.body == "Succeeded") {
+                    //     window.location.href = "index"
+                    // }
+                    // else {
+                    //     this.$message.error('用户名或密码错误')
+                    // }
+                })
+                this.tableData[index].Rno = this.form.Rno;
+                this.tableData[index].Rname = this.form.Rname;
+                this.tableData[index].Radd = this.form.Radd;
+                this.tableData[index].Rtype = this.form.Rtype;
+                this.tableData[index].Rgrade = this.form.Rgrade;
+                this.tableData[index].Rtel = this.form.Rtel;
+                this.$message('修改成功！');
+                //数据库update
+            },
+            handleCommand(command) {
+                this.$message('click on item ' + command);
+            }
+        },
+
+        data() {
+            return {
+                input3: "",
+                search: "",
+                form: {
+                    Rno: '',
+                    Rname: '',
+                    Radd: '',
+                    Rtype: '',
+                    Rgrade: '',
+                    Rtel: '',
+                },
+                actionType: 0,//用户权限
+                disabled1: false,
+                dialog1Visible: false,
+                dialog2Visible: false,
+                temp: null,
+                tableData: [{
+                    Rno: '2016-05-02',
+                    Rname: '老王的私房菜',
+                    Radd: '上海市普陀区金沙江路 1518 弄',
+                    Rtype: "川湘菜",
+                    Rgrade: 7,
+                    Rtel: '13115909767',
+                }
+                ]
+            }
+        },
+
+        created() {
+            console.log(this.tableData)
+            this.$http.get('/get_restaurant_list').then(function (res) {
+                console.log(res.bodyText)
+                for (var i in res.body.data) {
+                    this.tableData.push(res.body.data[i])
+                }
+            })
+        },
+    };
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>
