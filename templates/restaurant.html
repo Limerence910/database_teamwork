@@ -27,14 +27,7 @@
                     <el-input v-model="form.Rtel"></el-input>
                 </el-form-item>
                 <el-form-item label="商家类型">
-                    <br>
-                    <el-select v-model="form.Rtype">
-                        <el-option value="快餐便当">快餐便当</el-option>
-                        <el-option value="特色小吃">特色小吃</el-option>
-                        <el-option value="米饭面馆">米饭面馆</el-option>
-                        <el-option value="汉堡薯条">汉堡薯条</el-option>
-                        <el-option value="川湘菜">川湘菜</el-option>
-                    </el-select>
+                    <el-input v-model="form.Rtype"></el-input>
                 </el-form-item>
                 <el-form-item label="商家等级">
                     <el-input v-model="form.Rgrade" :disabled="disabled1"></el-input>
