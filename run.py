@@ -63,6 +63,10 @@ def deliveryman():
 def food():
     return render_template('food.html')
 
+@app.route('/form', methods=['GET'])
+def form():
+    return render_template('form.html')
+
 
 @app.route('/get_current_user', methods=['GET'])
 def get_current_user():
@@ -121,7 +125,7 @@ def delete_form():
 @app.route('/get_formdetail', methods=['POST'])
 def get_formdetail():
     datap = dict(eval(request.get_data()))
-    sql = "select * from Formdetail where Fnum='{}' ".format(datap['Fnum'])
+    sql = "select * from Formdetail,Food,Restaurant where Formdetail.Fno=Food.Fno and Food.Rno=Restaurant.Rno and Fnum='{}' ".format(datap['Fnum'])
     data = db.session.execute(sql)
     # db.session.commit()
     output = []
@@ -130,6 +134,8 @@ def get_formdetail():
         r_data = {}
         r_data['Fnum'] = record.Fnum
         r_data['Fno'] = record.Fno
+        r_data['Fname'] = record.Fname
+        r_data['Rname'] = record.Rname
         r_data['Fcount'] = record.Fcount
         output.append(r_data)
     return jsonify({'data': output})

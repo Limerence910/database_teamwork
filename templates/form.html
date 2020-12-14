@@ -15,7 +15,14 @@
             :close-on-click-modal='false'>
             <el-form :model="form">
                 <el-form-item label="订单状态">
-                    <el-input v-model="form.Fstatus"></el-input>
+                    <el-select v-model="form.Fstatus">
+                        <el-option key=0 value=0 label="未付款"></el-option>
+                        <el-option key=1 value=1 label="已付款"></el-option>
+                        <el-option key=2 value=2 label="未接单"></el-option>
+                        <el-option key=3 value=3 label="已接单"></el-option>
+                        <el-option key=4 value=4 label="派送中"></el-option>
+                        <el-option key=5 value=5 label="已送达"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -26,9 +33,13 @@
         <el-dialog title="订单详细" :visible.sync="dialog3Visible" :modal-append-to-body='false'
             :close-on-click-modal='false'>
             <el-table :data="formdetail" border style="width: 100%">
-                <el-table-column prop="Fnum" label="订单号" width="180">
+                <el-table-column prop="Fnum" label="订单号" width="100">
                 </el-table-column>
-                <el-table-column prop="Fno" label="菜品号" width="180">
+                <el-table-column prop="Fno" label="菜品号" width="100">
+                </el-table-column>
+                <el-table-column prop="Fname" label="菜品名" width="100">
+                </el-table-column>
+                <el-table-column prop="Rname" label="商家名" width="180">
                 </el-table-column>
                 <el-table-column prop="Fcount" label="菜品数量">
                 </el-table-column>
@@ -57,7 +68,7 @@
             </el-table-column>
             <el-table-column prop="Rtel" label="商家电话" width="180">
             </el-table-column>
-            <el-table-column prop="Fstatus" label="订单状态" width="100">
+            <el-table-column prop="FstatusS" label="订单状态" width="100">
             </el-table-column>
             <el-table-column prop="Dno" label="骑手编号" width="100">
             </el-table-column>
@@ -101,14 +112,13 @@
             show(index, rows) {
                 // rows.splice(index, 1);
                 // //数据库delete
-                this.formdetail=[];
-                this.dialog3Visible=true;
+                this.formdetail = [];
+                this.dialog3Visible = true;
                 this.$http.post('/get_formdetail', {
                     Fnum: rows[index].Fnum,
                 }).then(res => {
                     console.log(res);
-                    for(var i in res.body.data)
-                    {
+                    for (var i in res.body.data) {
                         this.formdetail.push(res.body.data[i])
                     }
                 })
@@ -144,7 +154,8 @@
             modify(index, rows) {
                 console.log(index);
                 this.form.index = index;
-                this.form.Fstatus = rows[index].Fstatus;
+                this.form.Fstatus = rows[index].Fstatus.toString();
+                console.log(this.form.Fstatus)
                 this.paycode = false;
                 console.log(rows);
                 if (this.actionType == 1 || this.actionType == 2) {//
@@ -194,11 +205,11 @@
             refresh() {
                 this.tableData = [];
                 this.$http.get('/get_form_list').then(function (res) {
-                console.log(res.bodyText)
-                for (var i in res.body.data) {
-                    this.tableData.push(res.body.data[i])
-                }
-            })
+                    console.log(res.bodyText)
+                    for (var i in res.body.data) {
+                        this.tableData.push(res.body.data[i])
+                    }
+                })
             }
         },
         created() {
@@ -206,6 +217,7 @@
             this.$http.get('/get_form_list').then(function (res) {
                 console.log(res.bodyText)
                 for (var i in res.body.data) {
+                    res.body.data[i].FstatusS = this.convert[res.body.data[i].Fstatus];
                     this.tableData.push(res.body.data[i])
                 }
             })
@@ -223,8 +235,10 @@
                     Ftime: '',
                     Rtel: '',
                     Fstatus: '',
+                    FstatusS: '',
                     Dno: '',
                 },
+                convert: ['未付款', '已付款', '未接单', '已接单', '派送中', '已送达'],
                 actionType: 1,//用户权限
                 disabled1: false,
                 dialog1Visible: false,
@@ -232,7 +246,7 @@
                 dialog3Visible: false,
                 temp: null,
                 tableData: [],
-                formdetail:[]
+                formdetail: []
             }
         }
     };
