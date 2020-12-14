@@ -65,11 +65,11 @@
         
         <br><br>
         <el-table :data="tableData.filter(data => !search || data.Fname.toLowerCase().includes(search.toLowerCase()) || 
-            data.Fno.toLowerCase().includes(search.toLowerCase()) || toString(data.Fprice).toLowerCase().includes(search.toLowerCase())) || 
-            toString(data.Fgood).toLowerCase().includes(search.toLowerCase())" style="width: 100%">
+            data.Fno.toLowerCase().includes(search.toLowerCase()) || toString(data.Fprice).toLowerCase().includes(search.toLowerCase()) || 
+            toString(data.Fgood).toLowerCase().includes(search.toLowerCase()) || data.Rname.toLowerCase().includes(search.toLowerCase()) ) " style="width: 100%">
             <el-table-column prop="Fno" label="菜品ID" width="180">
             </el-table-column>
-            <el-table-column prop="Rno" label="商家号" width="180">
+            <el-table-column prop="Rname" label="商家名" width="180">
             </el-table-column>
             <el-table-column prop="Fname" label="菜品名" width="180">
             </el-table-column>
@@ -210,6 +210,7 @@
                 var index = this.form.index;
                 this.$http.post('/insert_food', {
                     Rno: this.form.Rno,
+                    Rname: this.form.Rname,
                     Fname: this.form.Fname,
                     Fno: this.form.Fno,
                     Fgood: this.form.Fgood,
@@ -255,6 +256,7 @@
                 search: "",
                 form: {
                     Rno: '',
+                    Rname: '',
                     Fname: '',
                     Fno: '',
                     Fgood: '',

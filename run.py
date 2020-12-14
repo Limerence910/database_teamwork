@@ -69,6 +69,73 @@ def get_current_user():
     return username
 
 
+
+@app.route('/get_form_list', methods=['GET'])
+def get_form_list():
+    sql = "select * from Form"
+    data = db.session.execute(sql)
+    output = []
+    for record in data:
+        r_data = {}
+        r_data['Fnum'] = record.Fnum
+        r_data['Rno'] = record.Rno
+        r_data['Cno'] = record.Cno
+
+        r_data['Fday'] = record.Fday
+        r_data['Ftime'] = record.Ftime
+        r_data['Rtel'] = record.Rtel
+        r_data['Fstatus'] = record.Fstatus
+        r_data['Dno'] = record.Dno
+        output.append(r_data)
+    return jsonify({'data': output})
+
+
+@app.route('/update_form', methods=['POST'])
+def update_form():
+    data = dict(eval(request.get_data()))
+    sql = "update Form set Fstatus='{}' where Fnum='{}'".format(
+        data['Fstatus'], data['Fnum'])
+    try:
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/delete_form', methods=['POST'])
+def delete_form():
+    data = dict(eval(request.get_data()))
+    sql = "delete from Form where Fnum='{}'".format(data['Fnum'])
+    sql2 = "delete from Formdetail where Fnum='{}'".format(data['Fnum'])
+    try:
+        db.session.execute(sql)
+        db.session.commit()
+        db.session.execute(sql2)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/get_formdetail', methods=['POST'])
+def get_formdetail():
+    datap = dict(eval(request.get_data()))
+    sql = "select * from Formdetail where Fnum='{}' ".format(datap['Fnum'])
+    data = db.session.execute(sql)
+    # db.session.commit()
+    output = []
+    print(data)
+    for record in data:
+        r_data = {}
+        r_data['Fnum'] = record.Fnum
+        r_data['Fno'] = record.Fno
+        r_data['Fcount'] = record.Fcount
+        output.append(r_data)
+    return jsonify({'data': output})
+
+
+
 @app.route('/get_user_list', methods=['GET'])
 def get_user_list():
     sql = "select * from Consumer"
@@ -235,7 +302,7 @@ def add_deliveryman():
 
 @app.route('/get_food_list', methods=['GET'])
 def get_food_list():
-    sql = "select * from Food"
+    sql = "select * from Food,Restaurant where Food.Rno = Restaurant.Rno"
     data = db.session.execute(sql)
     output = []
     for record in data:
@@ -245,13 +312,11 @@ def get_food_list():
         r_data['Fno'] = record.Fno
         r_data['Fprice'] = record.Fprice
         r_data['Fgood'] = record.Fgood
-        # # sql2 = "select * from Restaurant where Rno = '{}' ".format(record.Rno)
-        # # data2 = db.session.execute(sql2)
-
-        # r_data['Rname'] = data2[0].Rname
+        r_data['Rname'] = record.Rname
         output.append(r_data)
-
+    
     return jsonify({'data': output})
+
 
 
 @app.route('/insert_food', methods=['POST'])
