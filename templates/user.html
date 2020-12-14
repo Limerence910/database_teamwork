@@ -102,14 +102,13 @@
     var Main = {
         methods: {
             deleteRow(index, rows) {
-                rows.splice(index, 1);
                 //数据库delete
                 this.$http.post('/delete_user', {
-                    Cno: this.form.Cno,
+                    Cno:rows[index].Cno,
                 }).then(res => {
                     console.log(res);
                 })
-                this.tableData.splice(index, 1);
+                rows.splice(index, 1);
                 this.$message("删除成功！");
             },
             handleClick(row) {

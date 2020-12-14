@@ -14,26 +14,8 @@
         <el-dialog title="请输入信息" :visible.sync="dialog2Visible" :modal-append-to-body='false'
             :close-on-click-modal='false'>
             <el-form :model="form">
-                <el-form-item v-if="paycode==true" label="用户id">
-                    <el-input v-model="form.Cno"></el-input>
-                </el-form-item>
-                <el-form-item label="用户名">
-                    <el-input v-model="form.Cname"></el-input>
-                </el-form-item>
-                <el-form-item label="用户地址">
-                    <el-input v-model="form.Caddr"></el-input>
-                </el-form-item>
-                <el-form-item label="用户电话">
-                    <el-input v-model="form.CTel"></el-input>
-                </el-form-item>
-                <el-form-item v-if="paycode==true" label="支付密码">
-                    <el-input v-model="form.Cpaycode"></el-input>
-                </el-form-item>
-                <el-form-item label="会员等级">
-                    <el-input v-model="form.Cgrade" :disabled="disabled1"></el-input>
-                </el-form-item>
-                <el-form-item label="折扣等级">
-                    <el-input v-model="form.Cdiscount" :disabled="disabled1"></el-input>
+                <el-form-item label="订单状态">
+                    <el-input v-model="form.Fstatus"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -41,32 +23,47 @@
                 <el-button type="primary" @click="handleClose2()">确定</el-button>
             </span>
         </el-dialog>
-        <el-button type="primary" icon="el-icon-plus" @click="add()">添加</el-button>
+        <el-dialog title="订单详细" :visible.sync="dialog3Visible" :modal-append-to-body='false'
+            :close-on-click-modal='false'>
+            <el-table :data="formdetail" border style="width: 100%">
+                <el-table-column prop="Fnum" label="订单号" width="180">
+                </el-table-column>
+                <el-table-column prop="Fno" label="菜品号" width="180">
+                </el-table-column>
+                <el-table-column prop="Fcount" label="菜品数量">
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+
+
+        <!-- <el-button type="primary" icon="el-icon-plus" @click="add()">添加</el-button> -->
         <el-button icon="el-icon-refresh" @click="refresh()">刷新</el-button>
         <el-input placeholder="请输入搜索内容" v-model="search" suffix-icon="el-icon-search"
             style="width: max-content; float: right;">
         </el-input>
         <br><br>
-        <el-table :data="tableData.filter(data => !search || data.Cno.toLowerCase().includes(search.toLowerCase()) || 
-            data.Cname.toLowerCase().includes(search.toLowerCase()) || data.Caddr.toLowerCase().includes(search.toLowerCase()) || 
-            data.CTel.toLowerCase().includes(search.toLowerCase()) ) 
+        <el-table :data="tableData.filter(data => !search || data.Fnum.toLowerCase().includes(search.toLowerCase()) || 
+            data.Rno.toLowerCase().includes(search.toLowerCase()) || data.Cno.toLowerCase().includes(search.toLowerCase()) ) 
             " style="width: 100%">
-            <el-table-column prop="Cno" label="用户id" width="100">
+            <el-table-column prop="Fnum" label="订单号" width="100">
             </el-table-column>
-            <el-table-column prop="Cname" label="用户名" width="100">
+            <el-table-column prop="Rno" label="商家号" width="100">
             </el-table-column>
-            <el-table-column prop="Caddr" label="用户地址" width="280">
+            <el-table-column prop="Cno" label="用户号" width="100">
             </el-table-column>
-            <el-table-column prop="CTel" label="用户电话" width="180">
+            <el-table-column prop="Fday" label="订单日期" width="180">
             </el-table-column>
-            <el-table-column prop="Cgrade" label="会员等级" width="100">
+            <el-table-column prop="Ftime" label="订单时间" width="180">
             </el-table-column>
-            <el-table-column prop="Cdiscount" label="折扣等级" width="100">
+            <el-table-column prop="Rtel" label="商家电话" width="180">
             </el-table-column>
-            <el-table-column prop="Cmoney" label="余额" width="100">
+            <el-table-column prop="Fstatus" label="订单状态" width="100">
             </el-table-column>
-            <el-table-column fixed="right" label="操作" width="180">
+            <el-table-column prop="Dno" label="骑手编号" width="100">
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" width="300">
                 <template slot-scope="scope">
+                    <el-button @click="show(scope.$index, tableData)" type=" text" size="small">详情查看</el-button>
                     <el-button @click="deleteRow(scope.$index, tableData)" type=" text" size="small">删除</el-button>
                     <el-button @click="modify(scope.$index, tableData)" type=" text" size="small">修改</el-button>
                 </template>
@@ -101,15 +98,29 @@
 
     var Main = {
         methods: {
+            show(index, rows) {
+                // rows.splice(index, 1);
+                // //数据库delete
+                this.formdetail=[];
+                this.dialog3Visible=true;
+                this.$http.post('/get_formdetail', {
+                    Fnum: rows[index].Fnum,
+                }).then(res => {
+                    console.log(res);
+                    for(var i in res.body.data)
+                    {
+                        this.formdetail.push(res.body.data[i])
+                    }
+                })
+            },
             deleteRow(index, rows) {
-                rows.splice(index, 1);
                 //数据库delete
-                this.$http.post('/delete_user', {
-                    Cno: this.form.Cno,
+                this.$http.post('/delete_form', {
+                    Fnum: rows[index].Fnum,
                 }).then(res => {
                     console.log(res);
                 })
-                this.tableData.splice(index, 1);
+                rows.splice(index, 1);
                 this.$message("删除成功！");
             },
             handleClick(row) {
@@ -118,14 +129,14 @@
             add() {
                 this.form = {
                     index: '',
+                    Fnum: '',
+                    Rno: '',
                     Cno: '',
-                    Cname: '',
-                    Caddr: '',
-                    CTel: '',
-                    Cmoney: '',
-                    Cgrade: '',
-                    Cdiscount: '',
-                    Cpaycode: '',
+                    Fday: '',
+                    Ftime: '',
+                    Rtel: '',
+                    Fstatus: '',
+                    Dno: '',
                 };
                 this.paycode = true;
                 this.dialog2Visible = true;
@@ -133,16 +144,8 @@
             modify(index, rows) {
                 console.log(index);
                 this.form.index = index;
-                this.form.Cno = rows[index].Cno;
-                this.form.CTel = rows[index].CTel;
-                this.form.Cname = rows[index].Cname;
-                this.form.Caddr = rows[index].Caddr;
-                this.form.Cmoney = rows[index].Cmoney;
-                this.form.Cgrade = rows[index].Cgrade;
-                this.form.Cdiscount = rows[index].Cdiscount;
-                // this.form.push(rows);
+                this.form.Fstatus = rows[index].Fstatus;
                 this.paycode = false;
-
                 console.log(rows);
                 if (this.actionType == 1 || this.actionType == 2) {//
                     this.dialog2Visible = true;
@@ -164,24 +167,13 @@
                 //数据库update
                 if (this.paycode == false) {
                     var index = this.form.index;
-                    this.$http.post('/update_user', {
-                        Cno: this.form.Cno,
-                        CTel: this.form.CTel,
-                        Cname: this.form.Cname,
-                        Caddr: this.form.Caddr,
-                        Cmoney: this.form.Cmoney,
-                        Cgrade: this.form.Cgrade,
-                        Cdiscount: this.form.Cdiscount,
+                    this.$http.post('/update_form', {
+                        Fnum: this.form.Fnum,
+                        Fstatus: this.form.Fstatus
                     }).then(function (res) {
                         console.log(res)
                     })
-                    this.tableData[index].Cno = this.form.Cno;
-                    this.tableData[index].CTel = this.form.CTel;
-                    this.tableData[index].Cname = this.form.Cname;
-                    this.tableData[index].Caddr = this.form.Caddr;
-                    this.tableData[index].Cmoney = this.form.Cmoney;
-                    this.tableData[index].Cgrade = this.form.Cgrade;
-                    this.tableData[index].Cdiscount = this.form.Cdiscount;
+                    this.tableData[index].Fstatus = this.form.Fstatus;
                     this.$message('修改成功！');
                 }
                 else {
@@ -200,19 +192,18 @@
                 }
             },
             refresh() {
-                this.tableData=[];
-                console.log(this.tableData)
-                this.$http.get('/get_user_list').then(function (res) {
-                    console.log(res.bodyText)
-                    for (var i in res.body.data) {
-                        this.tableData.push(res.body.data[i])
-                    }
-                })
+                this.tableData = [];
+                this.$http.get('/get_form_list').then(function (res) {
+                console.log(res.bodyText)
+                for (var i in res.body.data) {
+                    this.tableData.push(res.body.data[i])
+                }
+            })
             }
         },
         created() {
             console.log(this.tableData)
-            this.$http.get('/get_user_list').then(function (res) {
+            this.$http.get('/get_form_list').then(function (res) {
                 console.log(res.bodyText)
                 for (var i in res.body.data) {
                     this.tableData.push(res.body.data[i])
@@ -225,21 +216,23 @@
                 search: "",
                 form: {
                     index: '',
+                    Fnum: '',
+                    Rno: '',
                     Cno: '',
-                    Cname: '',
-                    Caddr: '',
-                    CTel: '',
-                    Cmoney: '',
-                    Cgrade: '',
-                    Cdiscount: '',
-                    Cpaycode: '',
+                    Fday: '',
+                    Ftime: '',
+                    Rtel: '',
+                    Fstatus: '',
+                    Dno: '',
                 },
                 actionType: 1,//用户权限
                 disabled1: false,
                 dialog1Visible: false,
                 dialog2Visible: false,
+                dialog3Visible: false,
                 temp: null,
-                tableData: []
+                tableData: [],
+                formdetail:[]
             }
         }
     };
