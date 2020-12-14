@@ -227,6 +227,64 @@ def add_deliveryman():
     except:
         return "Failed"
 
+@app.route('/get_food_list', methods=['GET'])
+def get_food_list():
+    sql = "select * from Food"
+    data = db.session.execute(sql)
+    output = []
+    for record in data:
+        r_data = {}
+        r_data['Rno'] = record.Rno
+        r_data['Fname'] = record.Fname
+        r_data['Fno'] = record.Fno
+        r_data['Fprice'] = record.Fprice
+        r_data['Fgood'] = record.Fgood
+        # # sql2 = "select * from Restaurant where Rno = '{}' ".format(record.Rno)
+        # # data2 = db.session.execute(sql2)
+
+        # r_data['Rname'] = data2[0].Rname
+        output.append(r_data)
+    
+    return jsonify({'data': output})
+
+@app.route('/insert_food', methods=['POST'])
+def insert_food():
+    data = dict(eval(request.get_data()))
+    print(data)
+    sql = "insert into Food(Fno,Fname,Fprice,Fgood,Rno) VALUES('{}','{}','{}','{}','{}')".format(
+        data['Fno'], data['Fname'], data['Fprice'], data['Fgood'], data['Rno'])
+    print(sql)
+    try:
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"   
+
+
+@app.route('/update_food', methods=['POST'])
+def update_food():
+    data = dict(eval(request.get_data()))
+    sql = "update Food set Fno='{}', Fname='{}', Fprice='{}', Fgood='{}', Rno='{}' where Fno='{}'".format(
+        data['Fno'], data['Fname'], data['Fprice'], data['Fgood'], data['Rno'], data['Fno'])
+    try:
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+@app.route('/delect_food', methods=['POST'])
+def delect_food():
+    data = dict(eval(request.get_data()))
+    sql = "delete from Food where Fno = '{}' ".format(data['Fno'])
+    try:
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
 
 if __name__ == '__main__':
     app.run(debug=True)
