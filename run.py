@@ -59,6 +59,11 @@ def deliveryman():
     return render_template('deliveryman.html')
 
 
+@app.route('/food', methods=['GET'])
+def food():
+    return render_template('food.html')
+
+
 @app.route('/get_current_user', methods=['GET'])
 def get_current_user():
     return username
@@ -227,6 +232,7 @@ def add_deliveryman():
     except:
         return "Failed"
 
+
 @app.route('/get_food_list', methods=['GET'])
 def get_food_list():
     sql = "select * from Food"
@@ -244,8 +250,9 @@ def get_food_list():
 
         # r_data['Rname'] = data2[0].Rname
         output.append(r_data)
-    
+
     return jsonify({'data': output})
+
 
 @app.route('/insert_food', methods=['POST'])
 def insert_food():
@@ -259,7 +266,7 @@ def insert_food():
         db.session.commit()
         return "Succeeded"
     except:
-        return "Failed"   
+        return "Failed"
 
 
 @app.route('/update_food', methods=['POST'])
@@ -273,6 +280,7 @@ def update_food():
         return "Succeeded"
     except:
         return "Failed"
+
 
 @app.route('/delect_food', methods=['POST'])
 def delect_food():
