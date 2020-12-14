@@ -72,7 +72,9 @@ def form():
 def get_current_user():
     return username
 
-
+@app.route('/account', methods=['GET'])
+def account():
+    return render_template('account.html')
 
 @app.route('/get_form_list', methods=['GET'])
 def get_form_list():
@@ -364,6 +366,58 @@ def delect_food():
     except:
         return "Failed"
 
+
+@app.route('/get_account_list', methods=['GET'])
+def get_account_list():
+    sql = "select * from Account"
+    data = db.session.execute(sql)
+    output = []
+    for record in data:
+        r_data = {}
+        r_data['Ano'] = record.Ano
+        r_data['Apassword'] = record.Apassword
+        r_data['APermission'] = record.APermission
+        r_data['Aid'] = record.Aid
+        output.append(r_data)
+    return jsonify({'data': output})
+
+
+@app.route('/update_account', methods=['POST'])
+def update_account():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "update Account set Aid='{}', Apassword='{}', APermission='{}' where Ano='{}'".format(
+            data['Aid'], data['Apassword'], data['APermission'], data['Ano'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "delete from Account where Ano='{}'".format(data['Ano'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/add_account', methods=['POST'])
+def add_account():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "insert into Account values ('{}', '{}', '{}', '{}')".format(
+            data['Ano'], data['Apassword'], data['APermission'], data['Aid'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
 
 if __name__ == '__main__':
     app.run(debug=True)

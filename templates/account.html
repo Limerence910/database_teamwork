@@ -14,14 +14,23 @@
         <el-dialog title="请输入信息" :visible.sync="dialog2Visible" :modal-append-to-body='false'
             :close-on-click-modal='false'>
             <el-form :model="form">
-                <el-form-item label="骑手ID" v-if="actionType == 0">
-                    <el-input v-model="form.Dno"></el-input>
+                <el-form-item label="账户ID" v-if="actionType == 0">
+                    <el-input v-model="form.Ano"></el-input>
                 </el-form-item>
-                <el-form-item label="骑手名字">
-                    <el-input v-model="form.Dname"></el-input>
+                <el-form-item label="账户名">
+                    <el-input v-model="form.Aid"></el-input>
                 </el-form-item>
-                <el-form-item label="骑手电话">
-                    <el-input v-model="form.Dtel"></el-input>
+                <el-form-item label="账户密码">
+                    <el-input v-model="form.Apassword" type="password"></el-input>
+                </el-form-item>
+                <el-form-item label="账户权限">
+                    <br>
+                    <el-select v-model="form.APermission">
+                        <el-option key=0 value=0 label="系统管理员"></el-option>
+                        <el-option key=1 value=1 label="商户"></el-option>
+                        <el-option key=2 value=2 label="骑手"></el-option>
+                        <el-option key=3 value=3 label="客户"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -39,11 +48,11 @@
         <br><br>
         <el-table :data="tableData.filter(data => !search || data.Dname.toLowerCase().includes(search.toLowerCase()) || 
             data.Dtel.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
-            <el-table-column prop="Dno" label="骑手ID">
+            <el-table-column prop="Ano" label="账户ID">
             </el-table-column>
-            <el-table-column prop="Dname" label="骑手名字">
+            <el-table-column prop="Aid" label="账户名">
             </el-table-column>
-            <el-table-column prop="Dtel" label="骑手电话">
+            <el-table-column prop="APermissionS" label="账户权限">
             </el-table-column>
             <el-table-column fixed="right" label="操作" v-if="search == ''">
                 <template slot-scope="scope">
@@ -84,21 +93,21 @@
     var Main = {
         methods: {
             deleteRow(index, rows) {
-                this.$http.post('/delete_deliveryman', {
-                    Dno: this.tableData[index].Dno
+                this.$http.post('/delete_account', {
+                    Ano: this.tableData[index].Ano
                 }).then(function (res) {
                     if (res.body == "Succeeded") {
                         rows.splice(index, 1);
                         this.$message('删除成功！');
                     }
                     else {
-                        this.$confirm('删除该骑手将导致已有的订单数据丢失，是否继续删除？', '警告', {
+                        this.$confirm('删除该账户将导致已有的相关数据丢失，是否继续删除？', '警告', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'
                         }).then(() => {
-                            this.$http.post('/delete_deliveryman_cascade', {
-                                Dno: this.tableData[index].Dno
+                            this.$http.post('/delete_account_cascade', {
+                                Rno: this.tableData[index].Rno
                             }).then(function (res) {
                                 if (res.body == "Succeeded") {
                                     rows.splice(index, 1);
@@ -123,18 +132,20 @@
             },
             add() {
                 this.actionType = 0;
-                this.form.Dno = null;
-                this.form.Dname = null;
-                this.form.Dtel = null;
+                this.form.Ano = null;
+                this.form.Apassword = null;
+                this.form.APermission = null;
+                this.form.Aid = null;
                 this.dialog2Visible = true;
             },
             modify(index, rows) {
                 // console.log(index);
                 this.form.index = index;
                 this.actionType = 1;
-                this.form.Dno = rows[index].Dno;
-                this.form.Dname = rows[index].Dname;
-                this.form.Dtel = rows[index].Dtel;
+                this.form.Ano = rows[index].Ano;
+                this.form.Apassword = rows[index].Apassword;
+                this.form.APermission = rows[index].APermission.toString();
+                this.form.Aid = rows[index].Aid;
                 // console.log(rows);
                 this.dialog2Visible = true;
                 // if (this.actionType == 0 || this.actionType == 2) {//
@@ -155,17 +166,19 @@
                 // console.log(this.form);
                 var index = this.form.index;
                 if (this.actionType) {
-                    this.$http.post('/update_deliveryman', {
-                        Dno: this.form.Dno,
-                        Dname: this.form.Dname,
-                        Dtel: this.form.Dtel
+                    this.$http.post('/update_account', {
+                        Ano: this.form.Ano,
+                        Apassword: this.form.Apassword,
+                        APermission: this.form.APermission,
+                        Aid: this.form.Aid
                     }).then(function (res) {
                         if (res.body == "Succeeded") {
                             // this.tableData[index].Dno = this.form.Dno;
                             // console.log(this.tableData);
                             // console.log(index);
-                            this.tableData[index].Dname = this.form.Dname;
-                            this.tableData[index].Dtel = this.form.Dtel;
+                            this.tableData[index].Apassword = this.form.Apassword;
+                            this.tableData[index].APermission = this.form.APermission;
+                            this.tableData[index].Aid = this.form.Aid;
                             this.dialog2Visible = false;
                             this.$message('修改成功！');
                         }
@@ -174,16 +187,19 @@
                         }
                     })
                 } else {
-                    this.$http.post('/add_deliveryman', {
-                        Dno: this.form.Dno,
-                        Dname: this.form.Dname,
-                        Dtel: this.form.Dtel
+                    this.$http.post('/add_account', {
+                        Ano: this.form.Ano,
+                        Apassword: this.form.Apassword,
+                        APermission: this.form.APermission,
+                        Aid: this.form.Aid
                     }).then(function (res) {
                         if (res.body == "Succeeded") {
                             temp = {}
-                            temp.Dno = this.form.Dno;
-                            temp.Dname = this.form.Dname;
-                            temp.Dtel = this.form.Dtel;
+                            temp.Ano = this.form.Ano;
+                            temp.Apassword = this.form.Apassword;
+                            temp.APermission = this.form.APermission;
+                            temp.APermissionS = this.convert[this.form.APermission];
+                            temp.Aid = this.form.Aid;
                             this.tableData.push(temp);
                             this.dialog2Visible = false;
                             this.$message('添加成功！');
@@ -200,7 +216,7 @@
                 this.$message('click on item ' + command);
             },
             refresh() {
-                this.$http.get('/get_deliveryman_list').then(function (res) {
+                this.$http.get('/get_account_list').then(function (res) {
                     this.tableData = []
                     for (var i in res.body.data) {
                         this.tableData.push(res.body.data[i])
@@ -214,22 +230,25 @@
                 input3: "",
                 search: "",
                 form: {
-                    Dno: '',
-                    Dname: '',
-                    Dtel: '',
+                    Ano: '',
+                    Apassword: '',
+                    APermission: '',
+                    Aid: ''
                 },
                 actionType: 0,//用户权限
                 disabled1: false,
                 dialog1Visible: false,
                 dialog2Visible: false,
                 temp: null,
-                tableData: []
+                tableData: [],
+                convert: ['系统管理员', '商户', '骑手', '客户'],
             }
         },
 
         created() {
-            this.$http.get('/get_deliveryman_list').then(function (res) {
+            this.$http.get('/get_account_list').then(function (res) {
                 for (var i in res.body.data) {
+                    res.body.data[i].APermissionS = this.convert[res.body.data[i].APermission];
                     this.tableData.push(res.body.data[i])
                 }
             })

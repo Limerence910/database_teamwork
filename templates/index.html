@@ -80,7 +80,7 @@
         data() {
             return {
                 username: '',
-                page: 'user'
+                page: 'account'
             }
         },
         created() {
@@ -99,7 +99,7 @@
             handleSelect(index, indexPath) {
                 console.log(index);
                 if (index == 1) {
-                    this.page = "";
+                    this.page = "account";
                 } else if (index == 2) {
                     this.page = "restaurant";
                 } else if (index == 3) {
