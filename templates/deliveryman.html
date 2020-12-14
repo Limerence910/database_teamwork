@@ -14,30 +14,14 @@
         <el-dialog title="请输入信息" :visible.sync="dialog2Visible" :modal-append-to-body='false'
             :close-on-click-modal='false'>
             <el-form :model="form">
-                <el-form-item label="商家ID（不可重复）" v-if="actionType == 0">
-                    <el-input v-model="form.Rno"></el-input>
+                <el-form-item label="骑手ID" v-if="actionType == 0">
+                    <el-input v-model="form.Dno"></el-input>
                 </el-form-item>
-                <el-form-item label="商家名">
-                    <el-input v-model="form.Rname"></el-input>
+                <el-form-item label="骑手名字">
+                    <el-input v-model="form.Dname"></el-input>
                 </el-form-item>
-                <el-form-item label="商家地址">
-                    <el-input v-model="form.Radd"></el-input>
-                </el-form-item>
-                <el-form-item label="商家电话">
-                    <el-input v-model="form.Rtel"></el-input>
-                </el-form-item>
-                <el-form-item label="商家类型">
-                    <br>
-                    <el-select v-model="form.Rtype">
-                        <el-option value="快餐便当">快餐便当</el-option>
-                        <el-option value="特色小吃">特色小吃</el-option>
-                        <el-option value="米饭面馆">米饭面馆</el-option>
-                        <el-option value="汉堡薯条">汉堡薯条</el-option>
-                        <el-option value="川湘菜">川湘菜</el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="商家等级">
-                    <el-input v-model="form.Rgrade" :disabled="disabled1"></el-input>
+                <el-form-item label="骑手电话">
+                    <el-input v-model="form.Dtel"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -53,20 +37,13 @@
             style="width: max-content; float: right;">
         </el-input>
         <br><br>
-        <el-table :data="tableData.filter(data => !search || data.Rname.toLowerCase().includes(search.toLowerCase()) || 
-            data.Radd.toLowerCase().includes(search.toLowerCase()) || data.Rtype.toLowerCase().includes(search.toLowerCase())) || 
-            data.Rtel.toLowerCase().includes(search.toLowerCase())" style="width: 100%">
-            <el-table-column prop="Rno" label="商家ID">
+        <el-table :data="tableData.filter(data => !search || data.Dname.toLowerCase().includes(search.toLowerCase()) || 
+            data.Dtel.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
+            <el-table-column prop="Dno" label="骑手ID">
             </el-table-column>
-            <el-table-column prop="Rname" label="商家名">
+            <el-table-column prop="Dname" label="骑手名字">
             </el-table-column>
-            <el-table-column prop="Radd" label="商家地址">
-            </el-table-column>
-            <el-table-column prop="Rtype" label="商家类型">
-            </el-table-column>
-            <el-table-column prop="Rtel" label="商家电话">
-            </el-table-column>
-            <el-table-column prop="Rgrade" label="商家等级">
+            <el-table-column prop="Dtel" label="骑手电话">
             </el-table-column>
             <el-table-column fixed="right" label="操作" v-if="search == ''">
                 <template slot-scope="scope">
@@ -107,20 +84,20 @@
     var Main = {
         methods: {
             deleteRow(index, rows) {
-                this.$http.post('/delete_restaurant', {
-                    Rno: this.tableData[index].Rno
+                this.$http.post('/delete_deliveryman', {
+                    Dno: this.tableData[index].Dno
                 }).then(function (res) {
                     if (res.body == "Succeeded") {
                         rows.splice(index, 1);
                         this.$message('删除成功！');
                     }
                     else {
-                        this.$confirm('删除该餐厅将导致已有的菜品、订单数据丢失，是否继续删除？', '警告', {
+                        this.$confirm('删除该骑手将导致已有的订单数据丢失，是否继续删除？', '警告', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'
                         }).then(() => {
-                            this.$http.post('/delete_restaurant_cascade', {
+                            this.$http.post('/delete_deliveryman_cascade', {
                                 Rno: this.tableData[index].Rno
                             }).then(function (res) {
                                 if (res.body == "Succeeded") {
@@ -146,24 +123,18 @@
             },
             add() {
                 this.actionType = 0;
-                this.form.Rno = null;
-                this.form.Rname = null;
-                this.form.Radd = null;
-                this.form.Rtype = null;
-                this.form.Rgrade = null;
-                this.form.Rtel = null;
+                this.form.Dno = null;
+                this.form.Dname = null;
+                this.form.Dtel = null;
                 this.dialog2Visible = true;
             },
             modify(index, rows) {
                 // console.log(index);
                 this.form.index = index;
                 this.actionType = 1;
-                this.form.Rno = rows[index].Rno;
-                this.form.Rname = rows[index].Rname;
-                this.form.Radd = rows[index].Radd;
-                this.form.Rtype = rows[index].Rtype;
-                this.form.Rgrade = rows[index].Rgrade;
-                this.form.Rtel = rows[index].Rtel;
+                this.form.Dno = rows[index].Dno;
+                this.form.Dname = rows[index].Dname;
+                this.form.Dtel = rows[index].Dtel;
                 // console.log(rows);
                 this.dialog2Visible = true;
                 // if (this.actionType == 0 || this.actionType == 2) {//
@@ -184,23 +155,17 @@
                 // console.log(this.form);
                 var index = this.form.index;
                 if (this.actionType) {
-                    this.$http.post('/update_restaurant', {
-                        Rno: this.form.Rno,
-                        Rname: this.form.Rname,
-                        Radd: this.form.Radd,
-                        Rtype: this.form.Rtype,
-                        Rgrade: this.form.Rgrade,
-                        Rtel: this.form.Rtel
+                    this.$http.post('/update_deliveryman', {
+                        Dno: this.form.Dno,
+                        Dname: this.form.Dname,
+                        Dtel: this.form.Dtel
                     }).then(function (res) {
                         if (res.body == "Succeeded") {
-                            // this.tableData[index].Rno = this.form.Rno;
+                            // this.tableData[index].Dno = this.form.Dno;
                             // console.log(this.tableData);
                             // console.log(index);
-                            this.tableData[index].Rname = this.form.Rname;
-                            this.tableData[index].Radd = this.form.Radd;
-                            this.tableData[index].Rtype = this.form.Rtype;
-                            this.tableData[index].Rgrade = this.form.Rgrade;
-                            this.tableData[index].Rtel = this.form.Rtel;
+                            this.tableData[index].Dname = this.form.Dname;
+                            this.tableData[index].Dtel = this.form.Dtel;
                             this.dialog2Visible = false;
                             this.$message('修改成功！');
                         }
@@ -209,22 +174,16 @@
                         }
                     })
                 } else {
-                    this.$http.post('/add_restaurant', {
-                        Rno: this.form.Rno,
-                        Rname: this.form.Rname,
-                        Radd: this.form.Radd,
-                        Rtype: this.form.Rtype,
-                        Rgrade: this.form.Rgrade,
-                        Rtel: this.form.Rtel
+                    this.$http.post('/add_deliveryman', {
+                        Dno: this.form.Dno,
+                        Dname: this.form.Dname,
+                        Dtel: this.form.Dtel
                     }).then(function (res) {
                         if (res.body == "Succeeded") {
                             temp = {}
-                            temp.Rno = this.form.Rno;
-                            temp.Rname = this.form.Rname;
-                            temp.Radd = this.form.Radd;
-                            temp.Rtype = this.form.Rtype;
-                            temp.Rgrade = this.form.Rgrade;
-                            temp.Rtel = this.form.Rtel;
+                            temp.Dno = this.form.Dno;
+                            temp.Dname = this.form.Dname;
+                            temp.Dtel = this.form.Dtel;
                             this.tableData.push(temp);
                             this.dialog2Visible = false;
                             this.$message('添加成功！');
@@ -241,7 +200,7 @@
                 this.$message('click on item ' + command);
             },
             refresh() {
-                this.$http.get('/get_restaurant_list').then(function (res) {
+                this.$http.get('/get_deliveryman_list').then(function (res) {
                     this.tableData = []
                     for (var i in res.body.data) {
                         this.tableData.push(res.body.data[i])
@@ -255,12 +214,9 @@
                 input3: "",
                 search: "",
                 form: {
-                    Rno: '',
-                    Rname: '',
-                    Radd: '',
-                    Rtype: '',
-                    Rgrade: '',
-                    Rtel: '',
+                    Dno: '',
+                    Dname: '',
+                    Dtel: '',
                 },
                 actionType: 0,//用户权限
                 disabled1: false,
@@ -272,7 +228,7 @@
         },
 
         created() {
-            this.$http.get('/get_restaurant_list').then(function (res) {
+            this.$http.get('/get_deliveryman_list').then(function (res) {
                 for (var i in res.body.data) {
                     this.tableData.push(res.body.data[i])
                 }

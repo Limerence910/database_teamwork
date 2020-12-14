@@ -54,9 +54,15 @@ def restaurant():
     return render_template('restaurant.html')
 
 
+@app.route('/deliveryman', methods=['GET'])
+def deliveryman():
+    return render_template('deliveryman.html')
+
+
 @app.route('/get_current_user', methods=['GET'])
 def get_current_user():
     return username
+
 
 @app.route('/get_user_list', methods=['GET'])
 def get_user_list():
@@ -68,7 +74,7 @@ def get_user_list():
         r_data['Cno'] = record.Cno
         r_data['Cname'] = record.Cname
         r_data['Caddr'] = record.Caddr
-        
+
         r_data['CTel'] = record.CTel
         r_data['Cmoney'] = record.Cmoney
         r_data['Cdiscount'] = record.Cdiscount
@@ -76,19 +82,21 @@ def get_user_list():
         output.append(r_data)
     return jsonify({'data': output})
 
-@app.route('/update_user',methods=['POST'])
+
+@app.route('/update_user', methods=['POST'])
 def update_user():
     data = dict(eval(request.get_data()))
     sql = "update Consumer set Cname='{}', Caddr='{}', Cmoney='{}', Cgrade='{}', Cdiscount='{}',CTel='{}' where Cno='{}'".format(
-        data['Cname'], data['Caddr'], data['Cmoney'], data['Cgrade'], data['Cdiscount'],data['CTel'] ,data['Cno'])
+        data['Cname'], data['Caddr'], data['Cmoney'], data['Cgrade'], data['Cdiscount'], data['CTel'], data['Cno'])
     try:
         db.session.execute(sql)
         db.session.commit()
         return "Succeeded"
     except:
         return "Failed"
-        
-@app.route('/delete_user',methods=['POST'])
+
+
+@app.route('/delete_user', methods=['POST'])
 def delete_user():
     data = dict(eval(request.get_data()))
     sql = "delete from Consumer where Cno='{}'".format(data['Cno'])
@@ -99,11 +107,12 @@ def delete_user():
     except:
         return "Failed"
 
-@app.route('/add_user',methods=['POST'])
+
+@app.route('/add_user', methods=['POST'])
 def add_user():
     data = dict(eval(request.get_data()))
     sql = "insert into Consumer(Cno,Cname,Caddr,Cmoney,Cgrade,Cdiscount,CTel,Cpaycode) values ('{}', '{}', '{}', '{}', '{}', '{}','{}','{}')".format(
-        data['Cno'],data['Cname'],data['Caddr'],data['Cmoney'],data['Cgrade'],data['Cdiscount'],data['CTel'],data['Cpaycode'])
+        data['Cno'], data['Cname'], data['Caddr'], data['Cmoney'], data['Cgrade'], data['Cdiscount'], data['CTel'], data['Cpaycode'])
     try:
         db.session.execute(sql)
         db.session.commit()
@@ -131,11 +140,92 @@ def get_restaurant_list():
 
 @app.route('/update_restaurant', methods=['POST'])
 def update_restaurant():
-    sql = "insert into Restaurant values('SN', '!!', '??', '..', 'PP', 2.0)"
-    db.session.execute(sql)
-    db.session.commit()
-    print("1")
-    return "P"
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "update Restaurant set Rname='{}', Radd='{}', Rtype='{}', Rtel='{}', Rgrade='{}' where Rno='{}'".format(
+            data['Rname'], data['Radd'], data['Rtype'], data['Rtel'], data['Rgrade'], data['Rno'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/delete_restaurant', methods=['POST'])
+def delete_restaurant():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "delete from Restaurant where Rno='{}'".format(data['Rno'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/add_restaurant', methods=['POST'])
+def add_restaurant():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "insert into Restaurant values ('{}', '{}', '{}', '{}', '{}', '{}')".format(
+            data['Rno'], data['Rname'], data['Radd'], data['Rtype'], data['Rtel'], data['Rgrade'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/get_deliveryman_list', methods=['GET'])
+def get_deliveryman_list():
+    sql = "select * from Delivery"
+    data = db.session.execute(sql)
+    output = []
+    for record in data:
+        r_data = {}
+        r_data['Dno'] = record.Dno
+        r_data['Dname'] = record.Dname
+        r_data['Dtel'] = record.Dtel
+        output.append(r_data)
+    return jsonify({'data': output})
+
+
+@app.route('/update_deliveryman', methods=['POST'])
+def update_deliveryman():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "update Delivery set Dname='{}', Dtel='{}' where Dno='{}'".format(
+            data['Dname'], data['Dtel'], data['Dno'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/delete_deliveryman', methods=['POST'])
+def delete_deliveryman():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "delete from Delivery where Dno='{}'".format(data['Dno'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
+
+
+@app.route('/add_deliveryman', methods=['POST'])
+def add_deliveryman():
+    try:
+        data = dict(eval(request.get_data()))
+        sql = "insert into Delivery values ('{}', '{}', '{}')".format(
+            data['Dno'], data['Dname'], data['Dtel'])
+        db.session.execute(sql)
+        db.session.commit()
+        return "Succeeded"
+    except:
+        return "Failed"
 
 
 if __name__ == '__main__':
